@@ -70,13 +70,10 @@ def read_vcfs(filelist=None, path=None):
     if filelist is not None:
         vcf_files.extend(filelist)
     
-    print(vcf_files)
     re_sub = re.compile("\\.vcf.*$")
     name_list = [re.sub(re_sub, "", os.path.basename(filename)) for filename in vcf_files]
 
 
-    print(vcf_files)
-    print(name_list)
 
 
     vcf_df = pd.concat([grab_vcf(filename,name=name) for name,filename in zip(name_list,vcf_files)])
@@ -137,6 +134,43 @@ def vcf_matrices(vcf_df):
 
 
 
+def dist(m1,m2):
+    return np.sum(np.abs(m1-m2))
+
+
+
+# Will output a "melted" DF
+# SAMPLE1, SAMPLE2, Distance
+def all_vs_all(vcf_matrix_dict):
+
+    keys = list(vcf_matrix_dict.keys())
+
+    n_solutions = (len(keys)**2 + len(keys))/2
+
+    out_df_list = []
+    
+    n_sites = len(vcf_matrix_dict[keys[0]])
+
+
+    for i, key_start in enumerate(keys[:-1]):
+        distances = [(key_start, key_end, dist(vcf_matrix_dict[key_start], vcf_matrix_dict[key_end]), i+j+i,) \
+                     for j,key_end in enumerate(keys[i+1:])]
+
+        distances_rev = [(key_end, key_start, score, comp) for key_start, key_end, score, comp in distances]
+
+        out_df_list.append(pd.DataFrame.from_records(distances + distances_rev,columns=["Sample1","Sample2","L1norm","comp"]))
+
+        n_solutions -= 2
+    
+    out_df = pd.concat(out_df_list)
+    
+    out_df["n_sites"] = n_sites
+
+    return out_df
+            
+
+
+
 
 
 
@@ -158,9 +192,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
 
-    parser.add_argument("-d", dest="vcfdir", type=str, help="Folder containing VCF files")
-    parser.add_argument("-v", dest="vcffiles", type=str, help="Single or list of vcf files (separated by a comma)")
+    parser.add_argument("-p", dest="vcfpath", default="",type=str, help="Folder containing VCF files")
+    parser.add_argument("-v", dest="vcffiles", default="", type=str, help="Single or list of vcf files (separated by a comma)")
     parser.add_argument("-o", dest="output", type=str, help="Folder containing VCF files")
+
+    args = parser.parse_args()
+
+    if args.vcffiles != "":
+        filelist = args.vcffiles.split(",")
+    else:
+        filelist = None
+
+    if args.vcfpath != "":
+        vcf_path = args.vcfpath
+    else:
+        vcf_path = None
+
+
+    vcf_df = read_vcfs(filelist=filelist, path=vcf_path)
+
+    vcf_m = vcf_matrices(vcf_df)
+
+    all_vs_all = all_vs_all(vcf_m)
+
+
+    all_vs_all.to_csv(args.output)
+
+
+
+
 
 
 
