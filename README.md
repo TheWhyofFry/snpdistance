@@ -3,6 +3,22 @@
 Create L1-norm distances between BAMs/VCFs from the same reference.  It specifically uses `lofreq` to get a quantitative representation of all the alleles at a site in a sample. While we do output position depth to discover sites with low/no coverage, it does not utilize it yet, i.e. when calculating the L1-norm distance between two samples where either have no information, it does not take this into account.  We should fix this in the near future.  There are also some internal filtering parameters that are fixed, but arguments to the `snpdistance` script should be added soon. We may include a "reference" L1-norm distance. . .for calibration?
 
 
+# Requirements
+
+
+General:
+
+- lofreq
+- samtools
+
+Python:
+
+- pandas
+- numpy
+- vcfpy
+
+
+
 # Workflow
 
 1. Input BAMs are run through lofreq's viterbi algorithm to realign reads
