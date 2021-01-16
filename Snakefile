@@ -29,7 +29,7 @@ def get_input(inputdir):
 	for c, df in delim_df.groupby("delim_count"):
 		if c == 0:
 			out_df_list.append(pd.DataFrame(dict(samplename=df.basename.apply(lambda x:x.replace(".bam","")).values,
-							     fielname=bam_files_ref[df.basename.values].values)))
+							     filename=bam_files_ref[df.basename.values].values)))
 			continue
 
 		for i in range(c):
