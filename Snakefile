@@ -96,7 +96,7 @@ rule vcf:
 		ref=config["reference"]
 	threads: 4
 	shell:
-		"lofreq call-parallel --pp-threads {threads} -f {params.ref} {input} -o {output}"
+		"lofreq call-parallel --pp-threads {threads} -f {params.ref} {input.BAM} -o {output}"
 
 
 
