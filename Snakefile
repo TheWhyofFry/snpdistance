@@ -68,32 +68,35 @@ rule viterbi:
 	
 	params:
 		ref=config["reference"]
+	threads: 2
 
 	shell:
-		"lofreq viterbi -f {params.ref} {input.BAM} | samtools sort -o {output.BAM} && "
-		"samtools index {output.BAM}"
+		"lofreq viterbi -f {params.ref} {input.BAM} | samtools sort -@ {threads} -o {output.BAM} && samtools index {output.BAM}"
 
 rule depth:
 	input:
-		"output/bam/{sample}.viterbi.bam"
+		BAM="output/bam/{sample}.viterbi.bam",
+		BAI="output/bam/{sample}.viterbi.bam.bai"
+
 
 	output:
 		"output/vcf/{sample}.depth.gz"
 	shell:
-		"samtools depth {input} | gzip -c -9 - > {output}"
+		"samtools depth {input.BAM} | gzip -c -9 - > {output}"
 
 
 
 rule vcf:
 	input:
-		"output/bam/{sample}.viterbi.bam"
+		BAM="output/bam/{sample}.viterbi.bam",
+		BAI="output/bam/{sample}.viterbi.bam.bai",
 	output:
 		"output/vcf/{sample}.vcf"
 	params:
 		ref=config["reference"]
 	threads: 4
 	shell:
-		"lofreq call-parallel --pp-threads {threads} -f {params.ref} {input} -o {output}"
+		"lofreq call-parallel --pp-threads {threads} -f {params.ref} {input.BAM} -o {output}"
 
 
 
