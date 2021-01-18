@@ -131,11 +131,49 @@ def vcf_matrices(vcf_df):
 
     return vcf_matrix_dict
 
+def badpos(vcf_folder, pos_set, min_depth=100):
+
+    reg_ext = re.compile("\\.depth.+")
+    filelist = glob("{vcf}/*depth.gz".format(vcf=vcf_folder))
+
+
+    pos_set = set(pos_set) 
+    basename = [re.sub(reg_ext,"",os.path.basename(filename)) for filename in filelist]
+
+    depth_df_list = []
+
+    for base, filename in zip(basename, filelist):
+
+        df = pd.read_table(filename, sep="\t", names=["ref","pos","depth"])
+        df = df[(df.depth < min_depth)]
+
+        df["sample"] = base
+
+        depth_df_list.append(df)
+    
+    return pd.concat(depth_df_list)
+
+                
 
 
 
-def dist(m1,m2):
-    return np.sum(np.abs(m1-m2))
+    
+
+
+
+
+
+
+
+
+
+
+def dist(m1,m2,badpositions=None):
+    if badpos is None:
+        return np.sum(np.abs(m1-m2))
+    else:
+        return np.sum(np.abs(m1-m2))
+        
 
 
 
@@ -168,6 +206,11 @@ def all_vs_all(vcf_matrix_dict):
 
     return out_df
             
+
+
+
+
+    
 
 
 
@@ -212,6 +255,8 @@ if __name__ == "__main__":
     vcf_df = read_vcfs(filelist=filelist, path=vcf_path)
 
     vcf_m = vcf_matrices(vcf_df)
+
+    vcf_m_filt = filter_vcf(vcf_m)
 
     all_vs_all = all_vs_all(vcf_m)
 
