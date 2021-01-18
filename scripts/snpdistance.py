@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     vcf_m_filt = filter_vcf(vcf_m)
 
-    all_vs_all = all_vs_all(vcf_m)
+    all_vs_all = all_vs_all(vcf_m_filt)
 
 
     all_vs_all.to_csv(args.output)
