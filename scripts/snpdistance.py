@@ -254,11 +254,11 @@ if __name__ == "__main__":
 
     vcf_df = read_vcfs(filelist=filelist, path=vcf_path)
 
-    vcf_m = vcf_matrices(vcf_df)
+    vcf_df_filt = filter_vcf(vcf_df)
+    vcf_m = vcf_matrices(vcf_df_filt)
 
-    vcf_m_filt = filter_vcf(vcf_m)
 
-    all_vs_all = all_vs_all(vcf_m_filt)
+    all_vs_all = all_vs_all(vcf_m)
 
 
     all_vs_all.to_csv(args.output)
